@@ -1,0 +1,36 @@
+Screen
+-- 80x25 character cells
+-- 8x16 pixels per cell = 640x400 total resolution
+-- use CSS media queries to scale appropriately by multiples of 640 (integer scaling -only-)
+-- bg/fg selected from 256-color palette (the standard "web safe" colors)
+-- "chunk mode" graphics made of 2x4 4x4 pixel squares per cell (e.g. a 16x16 image is an 8x4 rectangle of cells)
+
+Character set
+-- ASCII and then some
+-- use the existing 8x12 emoji
+---- add support for palette-swapping for custom colors
+
+Pieces
+
+Client
+-- React-based
+-- with no logged-in user, presents a login page (still via the screen interface)
+-- entirely keyboard-driven (and maybe gamepad - this API does exist!)
+
+Client-Server API
+-- read a page: GET /page?owner=<owner ?? self>&path=[<folder>/]<name>
+-- write a page: POST /page/[<folder>]
+-- stuff for messaging (realtime?)
+-- what else?
+
+Server
+-- handles reading/writing pages from the central storage DB
+-- handles messaging
+-- what else?
+
+DB
+-- no need for anything fancy, just a simple key/value store
+-- user profiles by userID
+-- user page spaces by ID (map of page names to page data)
+-- auth stuff
+

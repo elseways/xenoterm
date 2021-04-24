@@ -1,0 +1,16 @@
+.xeno {
+  text-align: center;
+  background-color: #001010;
+  min-height: 100%;
+}
+
+.xeno-header {
+  background-color: #082c34;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: white;
+}
