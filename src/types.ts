@@ -1,11 +1,11 @@
 export type GridCell = {
-    bg: string,
+    bg: number,
     layers: Layer[],
 }
 
 export type Layer = {
     code: number,
-    fg: string,
+    fg: number,
     effect?: Effect
 }
 

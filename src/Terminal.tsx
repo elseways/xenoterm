@@ -28,9 +28,9 @@ const ROWS = 25;
 const HEX = ['0', '3', '6', '9', 'c', 'f'];
 
 const INIT_CELL: GridCell = {
-    bg: '000',
+    bg: 0,
     layers: [{
-        fg: 'fff',
+        fg: 215,
         code: 0
     }]
 }
@@ -42,16 +42,16 @@ export default function Terminal() {
     const [gridState, setGridState] = useState<GridCell[]>(INIT_GRID);
     const divRef = useRef<HTMLDivElement>(null);
 
-    const colors: Array<{ r: number, g: number, b: number }> = [];
-    for (let r = 0; r <= 15; r += 3) {
-        for (let g = 0; g <= 15; g += 3) {
-            for (let b = 0; b <= 15; b += 3) {
-                colors.push({ r, g, b }); // 216 color cube (0/3/6/9/C/F for RGB)
+    const colors: Array<string> = [];
+    for (let r = 0; r <= 5; r += 1) {
+        for (let g = 0; g <= 5; g += 1) {
+            for (let b = 0; b <= 5; b += 1) {
+                colors.push(`${HEX[r]}${HEX[g]}${HEX[b]}`); // 216 color cube (0/3/6/9/C/F for RGB)
             }
         }
     }
 
-    function setCell(changes: { x: number, y: number, code?: number, fg?: string }[]) {
+    function setCells(changes: { x: number, y: number, code?: number, fg?: number }[]) {
 
         const merge: { [key: number]: GridCell } = {};
 
@@ -74,34 +74,53 @@ export default function Terminal() {
                 (_, idx) => ({
                     x: rint(COLS),
                     y: rint(ROWS),
-                    fg: `${HEX[rint(6)]}${HEX[rint(6)]}${HEX[rint(6)]}`,
-                    code: rint(96) + 32
+                    fg: rint(216),
+                    code: rint(384) + 32
                 })
             );
-            setCell(changes);
-        }, 50
+            setCells(changes);
+        }, 100
     )
 
     const scale = (divRef.current?.clientWidth ?? 640) / 640;
 
     return <div className='terminal' ref={divRef}>
-        {gridState.map(
-            (cell, idx) => {
-                return (
-                    <img
-                        style={{
-                            position: 'absolute',
-                            left: `${(idx % COLS) * 8 * scale}px`,
-                            top: `${Math.floor(idx / COLS) * 16 * scale}px`,
-                            filter: 'drop-shadow(1 1 0 blue)',
-                            background: cell.bg,
-                            transform: scale > 1 ? `scale(${scale})` : undefined
-                        }}
-                        alt={''}
-                        src={`data:image/png;base64,${font[cell.layers[0].code]}`}
-                    />);
-            }
-        )}
+        <svg style={{
+            position: 'absolute',
+            imageRendering: 'crisp-edges',
+            width: 640 * scale,
+            height: 400 * scale
+        }}>
+            <defs>
+                {
+                    colors.map((col) => {
+                        const r = parseInt(col.charAt(0), 16) / 15;
+                        const g = parseInt(col.charAt(1), 16) / 15;
+                        const b = parseInt(col.charAt(2), 16) / 15;
+                        return (<filter id={`color_${col}`}>
+                            <feColorMatrix type='matrix'
+                                values={`0 0 0 ${r} 0
+                                         0 0 0 ${g} 0
+                                         0 0 0 ${b} 0
+                                         0 0 0 0 1`} />
+                        </filter>)
+                    })
+                }
+            </defs>
+            {gridState.map(
+                (cell, idx) => {
+                    return (
+                        <image
+                            href={`data:image/png;base64,${font[cell.layers[0].code]}`}
+                            x={`${(idx % COLS) * 8 * scale}px`}
+                            y={`${Math.floor(idx / COLS) * 16 * scale}px`}
+                            width={8 * scale}
+                            height={16 * scale}
+                            filter={`url(#color_${colors[cell.layers[0].fg]})`}
+                        />);
+                }
+            )}
+        </svg>
     </div>;
 
 }

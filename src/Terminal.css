@@ -1,9 +1,7 @@
 
 div.terminal {
-    margin: auto;
     width: 640px;
     height: 400px;
-    border: 1px solid #0ff;
     position: relative;
 }
 
