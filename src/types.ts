@@ -6,7 +6,7 @@ export type GridCell = {
 export type Layer = {
     code: number,
     fg: string,
-    effect: Effect
+    effect?: Effect
 }
 
 export type Effect = null; // handle this later
