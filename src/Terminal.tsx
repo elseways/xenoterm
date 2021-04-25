@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import useInterval from 'react-useinterval';
 import update from 'immutability-helper';
 
 import './Terminal.css';
-import Cell from './Cell';
+import font from './compiled.json';
 import { GridCell } from './types';
 
 function rint(n: number) { return Math.floor(Math.random() * n) }
@@ -40,6 +40,7 @@ const INIT_GRID: GridCell[] = [...new Array(COLS * ROWS)].map(() => ({ ...INIT_C
 export default function Terminal() {
 
     const [gridState, setGridState] = useState<GridCell[]>(INIT_GRID);
+    const divRef = useRef<HTMLDivElement>(null);
 
     const colors: Array<{ r: number, g: number, b: number }> = [];
     for (let r = 0; r <= 15; r += 3) {
@@ -69,10 +70,10 @@ export default function Terminal() {
 
     useInterval(
         () => {
-            const changes = [...new Array(25)].map(
+            const changes = [...new Array(1000)].map(
                 (_, idx) => ({
-                    x: idx,
-                    y: idx,
+                    x: rint(COLS),
+                    y: rint(ROWS),
                     fg: `${HEX[rint(6)]}${HEX[rint(6)]}${HEX[rint(6)]}`,
                     code: rint(96) + 32
                 })
@@ -81,32 +82,26 @@ export default function Terminal() {
         }, 50
     )
 
-    return <svg viewBox='0 0 640 400'>
-        <defs>
-            {colors.map(
-                ({ r, g, b }) => <filter key={`${r}-${g}-${b}`} id={`color_${r.toString(16)}${g.toString(16)}${b.toString(16)}`}>
-                    <feColorMatrix
-                        type='matrix'
-                        values={`0 0 0 0 ${r / 15} 
-                                 0 0 0 0 ${g / 15}
-                                 0 0 0 0 ${b / 15}
-                                 0 0 0 1 0`}
-                    />
-                </filter>
-            )}
-        </defs>
+    const scale = (divRef.current?.clientWidth ?? 640) / 640;
+
+    return <div className='terminal' ref={divRef}>
         {gridState.map(
-            (gridCell, idx) => {
-                const x = idx % 80;
-                const y = Math.floor(idx / 80);
-                return (<Cell
-                    key={`${x}-${y}`}
-                    x={x * 8}
-                    y={y * 16}
-                    cell={gridCell}
-                />);
+            (cell, idx) => {
+                return (
+                    <img
+                        style={{
+                            position: 'absolute',
+                            left: `${(idx % COLS) * 8 * scale}px`,
+                            top: `${Math.floor(idx / COLS) * 16 * scale}px`,
+                            filter: 'drop-shadow(1 1 0 blue)',
+                            background: cell.bg,
+                            transform: scale > 1 ? `scale(${scale})` : undefined
+                        }}
+                        alt={''}
+                        src={`data:image/png;base64,${font[cell.layers[0].code]}`}
+                    />);
             }
         )}
-    </svg>;
+    </div>;
 
 }
