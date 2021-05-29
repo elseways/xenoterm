@@ -1,5 +1,6 @@
 
 div.terminal {
+    margin: auto;
     width: 640px;
     height: 400px;
     position: relative;

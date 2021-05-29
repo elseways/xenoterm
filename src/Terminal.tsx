@@ -79,14 +79,13 @@ export default function Terminal() {
                 })
             );
             setCells(changes);
-        }, 100
+        }, 125
     )
 
     const scale = (divRef.current?.clientWidth ?? 640) / 640;
 
     return <div className='terminal' ref={divRef}>
         <svg style={{
-            position: 'absolute',
             imageRendering: 'crisp-edges',
             width: 640 * scale,
             height: 400 * scale
@@ -97,7 +96,7 @@ export default function Terminal() {
                         const r = parseInt(col.charAt(0), 16) / 15;
                         const g = parseInt(col.charAt(1), 16) / 15;
                         const b = parseInt(col.charAt(2), 16) / 15;
-                        return (<filter id={`color_${col}`}>
+                        return (<filter id={`color_${col}`} key={`color_${col}`}>
                             <feColorMatrix type='matrix'
                                 values={`0 0 0 ${r} 0
                                          0 0 0 ${g} 0
@@ -109,15 +108,19 @@ export default function Terminal() {
             </defs>
             {gridState.map(
                 (cell, idx) => {
-                    return (
+                    const x = idx % COLS;
+                    const y = Math.floor(idx / COLS);
+                    return cell.layers.map((layer) =>
                         <image
-                            href={`data:image/png;base64,${font[cell.layers[0].code]}`}
-                            x={`${(idx % COLS) * 8 * scale}px`}
-                            y={`${Math.floor(idx / COLS) * 16 * scale}px`}
+                            key={`${x}-${y}`}
+                            href={`data:image/png;base64,${font[layer.code]}`}
+                            x={`${x * 8 * scale}px`}
+                            y={`${y * 16 * scale}px`}
                             width={8 * scale}
                             height={16 * scale}
-                            filter={`url(#color_${colors[cell.layers[0].fg]})`}
-                        />);
+                            filter={`url(#color_${colors[layer.fg]})`}
+                        />
+                    );
                 }
             )}
         </svg>
